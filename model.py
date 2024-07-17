@@ -2,18 +2,23 @@ import pandas as pd
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import joblib
+from sklearn.model_selection import train_test_split
 
 data = pd.read_csv('feature_set_dem.csv')
+X = np.array([data['prp_count'], data['VP_count'], data['NP_count'], #data['DT_count'], 
+                data['prp_noun_ratio'], data['word_sentence_ratio'],
+                data['count_pauses'], data['count_unintelligible'], 
+                data['count_repetitions'], data['ttr'], data['R'],
+                data['ARI'], data['CLI']])
 
-X = data[['prp_count', 'VP_count', 'NP_count', 'prp_noun_ratio', 'word_sentence_ratio',
-          'count_pauses', 'count_unintelligible', 'count_repetitions', 'ttr', 'R', 'ARI', 'CLI']].values
-Y_dementia = data['Category'].values
-Y_emergency = data['Emergency'].values
+X = X.T
 
-lda_dementia = LinearDiscriminantAnalysis()
-lda_dementia.fit(X, Y_dementia)
-joblib.dump(lda_dementia, 'lda_dementia_model.pkl')
+Y = data['Category'].values
 
-lda_emergency = LinearDiscriminantAnalysis()
-lda_emergency.fit(X, Y_emergency)
-joblib.dump(lda_emergency, 'lda_emergency_model.pkl')
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.20, random_state=212)
+train_samples, n_features = X.shape
+
+lda = LinearDiscriminantAnalysis()
+lda.fit(X_train, y_train)
+
+joblib.dump(lda, 'lda_dementia_model.pkl')
